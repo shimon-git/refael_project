@@ -73,15 +73,6 @@ This Ansible project automates the deployment and configuration of:
 
 ---
 
-## Troubleshooting
-- Ensure all required roles are available and configured properly.
-- Verify network connectivity between the control node and target servers.
-- Check Ansible logs for any errors and debug using the `-vvv` flag:
-  ```bash
-  ansible-playbook -i hosts.yaml main.yaml -vvv
-  ```
-
----
 
 ## Splunk Screenshots Images
 ![Splunk IIS Logs](images/splunk.png)
