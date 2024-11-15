@@ -1,0 +1,11 @@
+---
+cert_store_my: "Cert:\\LocalMachine\\My"
+cert_store_ca: "Cert:\\LocalMachine\\CA"
+domain_name: "splunk.refael"
+root_ca_name: "MendiRootCA"
+pfx_file: "splunk_refael.pfx"
+pfx_password: "1234"
+key_length: 2048
+certs_script_path: "C:\\Windows\\Temp\\certs.ps1"
+certs_script_template: "certs.ps1.j2"
+...

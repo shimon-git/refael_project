@@ -1,0 +1,41 @@
+---
+- name: Install Docker
+  apt:
+    name: docker.io
+    state: present
+
+- name: Start Docker service
+  service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Create default.yaml.j2 for splunk container
+  template:
+    src: "{{ default_conf_template }}"
+    dest: "{{ default_conf_file_path }}"
+
+
+- name: Start Splunk container with default.yml mounted
+  docker_container:
+    name: "{{ splunk_container_name }}"
+    image: "{{ splunk_docker_image }}"
+    state: started
+    restart_policy: always
+    ports:
+      - "{{ splunk_web_port }}:8000"
+      - "{{ splunk_hec_port }}:8088"
+      - "{{ splunk_receiver_port }}:9997"
+    env:
+      SPLUNK_START_ARGS: "--accept-license"
+    volumes:
+      - "{{ splunk_srv_certs_dir }}:/mnt"
+      - "{{ default_conf_file_path }}:{{ default_conf_file_mount_path }}"
+
+- name: Wait for Splunk Web to be available
+  ansible.builtin.wait_for:
+    host: "{{ ansible_default_ipv4.address }}"
+    port: "{{ splunk_receiver_port }}"
+    timeout: 300
+    delay: 10
+...

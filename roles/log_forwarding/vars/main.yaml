@@ -1,0 +1,11 @@
+---
+splunk_uf_download_link: "https://download.splunk.com/products/universalforwarder/releases/9.3.1/windows/splunkforwarder-9.3.1-0b8d769cb912-x64-release.msi"
+splunk_exe_installer: 'C:\splunkforwarder-8.2.2-x64-release.msi'
+logs_folder: 'C:\inetpub\logs\LogFiles\W3SVC1'
+source_type: "iis"
+index: "main"
+inputs_conf_template: 'templates/inputs.conf.j2'
+outputs_conf_template: 'templates/outputs.conf.j2'
+inputs_conf_file_path: 'C:\Program Files\SplunkUniversalForwarder\etc\system\local\inputs.conf'
+outputs_conf_file_path: 'C:\Program Files\SplunkUniversalForwarder\etc\system\local\outputs.conf'
+...

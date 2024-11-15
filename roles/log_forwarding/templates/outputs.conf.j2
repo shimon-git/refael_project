@@ -1,0 +1,11 @@
+[tcpout]
+defaultGroup = default-autolb-group
+
+[tcpout:default-autolb-group]
+server = {{ hostvars['ansible-c']['ansible_default_ipv4']['address'] }}:9997
+sslRootCAPath = {{ splunk_certs_folder }}\\{{ ca_file }}
+sslVerifyServerCert = true
+clientCert = {{ splunk_certs_folder }}\\{{ pem_file }}
+sslCertPath = {{ splunk_certs_folder }}\\{{ pem_file }}
+persistentQueueSize = 1024
+useACK = true

@@ -1,0 +1,9 @@
+all:
+  children:
+    control:
+      hosts:
+        ansible-c:
+    windows:
+      hosts:
+        win-srv:
+          ansible_host: 172.31.24.198

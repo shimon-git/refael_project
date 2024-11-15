@@ -1,0 +1,8 @@
+splunk:
+  password: {{ admin_password }}
+  s2s:
+    ca: /mnt/{{ ca_file }}
+    cert: /mnt/{{ pem_file }}
+    enable: true
+    port: 9997
+    ssl: true

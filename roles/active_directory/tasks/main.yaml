@@ -1,0 +1,24 @@
+---
+- name: Install AD and create a new domain named 'rafael.local'
+  win_domain:
+    dns_domain_name: '{{ domain_name }}'
+    domain_mode: WinThreshold
+    forest_mode: WinThreshold
+    create_dns_delegation: no
+    safe_mode_password: '{{ domain_password }}'
+  register: domain_install
+
+- name: Reboot the server if required
+  win_reboot:
+  when:
+    - domain_install.reboot_required
+
+- name: Wait for the server to come back online
+  win_wait_for:
+    host: "{{ ansible_host }}"
+    port: "{{ ansible_port }}"
+    timeout: 300
+    delay: 5
+  when:
+    - domain_install.reboot_required
+...

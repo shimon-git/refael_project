@@ -1,0 +1,60 @@
+# Define parameters using Ansible variables directly
+$domain_name = "{{ domain_name }}"
+$cert_store_my = "{{ cert_store_my }}"
+$cert_store_ca = "{{ cert_store_ca }}"
+$root_ca_name = "{{ root_ca_name }}"
+$ca_file = "{{ splunk_certs_folder }}\\{{ ca_file }}"
+$pfx_file = "{{ splunk_certs_folder }}\\{{ pfx_file }}"
+$pem_file = "{{ splunk_certs_folder }}\\{{ pem_file }}"
+$pfx_password = "{{ pfx_password }}"
+$key_length = {{ key_length }}
+
+
+# Function to uninstall existing CA
+function Remove-ExistingCA {
+    Write-Host "Removing existing CA..."
+    Uninstall-AdcsCertificationAuthority -Force
+    Start-Sleep -Seconds 5  # Pause to ensure removal is complete
+    Write-Host "Existing CA removed successfully."
+}
+
+# Install or reinstall the CA
+try {
+    Write-Host "Attempting to install the root CA..."
+    Install-AdcsCertificationAuthority -CAType EnterpriseRootCA -CACommonName $root_ca_name -KeyLength $key_length -Force
+    Write-Host "Root CA installed successfully."
+}
+catch {
+    # Check if the error is due to the CA already being installed
+    if ($_.Exception.GetType().Name -eq "CertificationAuthoritySetupException") {
+        Write-Host "A CA with the specified name already exists. Reinstalling..."
+        # Remove existing CA and reinstall
+        Remove-ExistingCA
+        Install-AdcsCertificationAuthority -CAType EnterpriseRootCA -CACommonName $root_ca_name -KeyLength $key_length -Force
+        Write-Host "Root CA reinstalled successfully."
+    }
+    else {
+        throw $_
+    }
+}
+
+# Retrieve the CA certificate
+$caCert = Get-ChildItem -Path $cert_store_ca | Where-Object { $_.Subject -like "*$root_ca_name*" }
+
+# Use the root CA to issue a certificate for the specified domain
+$issuedCert = New-SelfSignedCertificate -DnsName $domain_name -CertStoreLocation $cert_store_my -KeyExportPolicy Exportable -Signer $caCert
+
+# Export the Root CA Certificate in PEM format
+Export-Certificate -Cert $caCert -FilePath $ca_file
+
+# Convert the password for the PFX file to a secure string
+$password = ConvertTo-SecureString -String $pfx_password -Force -AsPlainText
+
+# Export the Issued Certificate in PFX Format
+Export-PfxCertificate -Cert $issuedCert -FilePath $pfx_file -Password $password
+
+# Convert the root ca certificate from der format to Base64
+openssl x509 -inform DER -in "$ca_file" -out "$ca_file" -outform PEM
+
+# Convert the certificate from pfx format to pem format using openssl
+openssl pkcs12 -in $pfx_file -out $pem_file -nodes -password pass:$pfx_password

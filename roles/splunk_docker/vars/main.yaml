@@ -1,0 +1,12 @@
+---
+admin_password: "Splunk@!"
+splunk_srv_certs_dir: "/opt/splunk/certs"
+splunk_web_port: 8000
+splunk_hec_port: 8088
+splunk_receiver_port: 9997
+default_conf_template: "default.yaml.j2"
+default_conf_file_path: "/opt/splunk/default.yaml"
+default_conf_file_mount_path: "/tmp/defaults/default.yml"
+splunk_docker_image: "splunk/splunk:latest"
+splunk_container_name: "splunk"
+...

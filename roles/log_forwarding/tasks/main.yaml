@@ -1,0 +1,32 @@
+---
+- name: Download Splunk Universal Forwarder MSI
+  win_get_url:
+    url: "{{ splunk_uf_download_link }}"
+    dest: "{{ splunk_exe_installer }}"
+
+- name: Install Splunk Universal Forwarder
+  win_package:
+    path: "{{ splunk_exe_installer }}"
+    arguments: AGREETOLICENSE=Yes
+    state: present
+
+- name: Create inputs.conf for IIS logs
+  template:
+    src: "{{ inputs_conf_template }}"
+    dest: "{{ inputs_conf_file_path }}"
+
+- name: Create outputs.conf to forward logs to Splunk receiver
+  template:
+    src: "{{ outputs_conf_template }}"
+    dest: "{{ outputs_conf_file_path }}"
+
+- name: Restart Splunk Universal Forwarder service
+  win_service:
+    name: "SplunkForwarder"
+    state: restarted
+
+- name: Clean up
+  win_file:
+    path: "{{ splunk_exe_installer }}"
+    state: absent
+...

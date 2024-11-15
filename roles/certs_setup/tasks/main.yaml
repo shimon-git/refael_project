@@ -1,0 +1,55 @@
+---
+- name: Install ADCS Certification Authority Role
+  win_feature:
+    name: ADCS-Cert-Authority
+    state: present
+
+- name: Create splunk directory to store the certificates
+  ansible.windows.win_file:
+    path: "{{ splunk_certs_folder }}"
+    state: directory
+
+- name: Install Chocolety software package management
+  win_shell:  |
+    Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+  
+- name: Install openssl using chocolety
+  chocolatey.chocolatey.win_chocolatey:
+    name: openssl
+    state: present
+
+- name: Render PowerShell script to issue the certificates
+  template:
+    src: "{{ certs_script_template }}"
+    dest: "{{ certs_script_path }}"
+  tags: "Test"
+
+- name: Execute rendered PowerShell script
+  win_shell: "{{ certs_script_path }}"
+
+- name: Creates directory on the splunk server to store the certificates
+  ansible.builtin.file:
+    path: "{{ splunk_srv_certs_dir }}"
+    state: directory
+    owner: "ansible"
+    group: "ansible"
+    mode: "0755"
+  delegate_to: "ansible-c"
+
+- name: Copy splunk certs from windows server to the splunk server
+  fetch:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    flat: yes
+  loop:
+    - { src: "{{ splunk_certs_folder }}\\{{ ca_file }}", dest: "{{ splunk_srv_certs_dir }}/{{ ca_file }}" }
+    - { src: "{{ splunk_certs_folder }}\\{{ pem_file }}", dest: "{{ splunk_srv_certs_dir }}/{{ pem_file }}" }
+
+- name: Clean up files
+  win_file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ certs_script_path }}"
+    - "{{ splunk_certs_folder }}\\{{ pfx_file }}"
+...

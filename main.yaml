@@ -1,0 +1,17 @@
+---
+- name: Ensure facts are gathered for all hosts
+  hosts: all
+  gather_facts: true
+
+- name: Setup Complete Refael project
+  hosts: windows
+  roles:
+    - role: active_directory
+    - role: certs_setup
+    - role: iis_server
+    - role: log_forwarding
+
+- name: Setup Splunk Environment
+  hosts: control
+  roles:
+    - role: splunk_docker

@@ -1,0 +1,6 @@
+---
+splunk_certs_folder: 'C:\splunk-certs'
+ca_file: "RootCA.pem"
+pem_file: "splunk_refael.pem"
+splunk_srv_certs_dir: "/opt/splunk/certs"
+...
